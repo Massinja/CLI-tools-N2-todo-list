@@ -33,7 +33,7 @@ func main() {
 			os.Exit(1)
 		}
 
-	case *complete == 1:
+	case *complete > 0:
 		if err := l.Complete(*complete); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
