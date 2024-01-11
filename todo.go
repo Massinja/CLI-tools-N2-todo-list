@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-type item struct {
+type Item struct {
 	Task        string
 	Done        bool
 	CreatedAt   time.Time
 	CompletedAt time.Time
 }
 
-type List []item
+type List []Item
 
-func checkErr(e error) {
+func CheckErr(e error) {
 	if e != nil {
 		fmt.Errorf("%v", e)
 		return
@@ -26,7 +26,7 @@ func checkErr(e error) {
 
 // Add creates a new todo item and appends it to the list
 func (l *List) Add(task string) {
-	t := item{
+	t := Item{
 		Task:        task,
 		Done:        false,
 		CreatedAt:   time.Now(),
@@ -66,10 +66,10 @@ func (l *List) Delete(i int) error {
 func (l *List) Save(filename string) error {
 
 	lj, err := json.Marshal(l)
-	checkErr(err)
+	CheckErr(err)
 
 	er := os.WriteFile(filename, lj, 0644)
-	checkErr(er)
+	CheckErr(er)
 
 	return nil
 }
@@ -78,14 +78,14 @@ func (l *List) Save(filename string) error {
 func (l *List) Get(filename string) error {
 
 	f, err := os.Open(filename)
-	checkErr(err)
+	CheckErr(err)
 
 	file, err := io.ReadAll(f)
-	checkErr(err)
+	CheckErr(err)
 	defer f.Close()
 
 	er := json.Unmarshal(file, l)
-	checkErr(er)
+	CheckErr(er)
 
 	return nil
 }
