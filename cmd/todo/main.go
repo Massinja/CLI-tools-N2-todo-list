@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"todo"
 )
 
@@ -36,7 +37,13 @@ func main() {
 
 	switch {
 	case *task != "":
-		l.Add(*task)
+		firstString := *task
+
+		// temporarily solution.
+		// In case user doesn't use "" to join multiple words to describe a task
+		allStrings := flag.Args()
+		allStrings = append([]string{firstString}, allStrings...)
+		l.Add(strings.Join(allStrings, " "))
 		if err := l.Save(todoFileName); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
