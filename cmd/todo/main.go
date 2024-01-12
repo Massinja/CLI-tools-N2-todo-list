@@ -60,7 +60,7 @@ func main() {
 		}
 
 	case *list:
-		fmt.Println(l)
+		fmt.Print(l)
 
 	default:
 		flag.Usage()
