@@ -60,11 +60,8 @@ func main() {
 		}
 
 	case *list:
-		for _, item := range *l {
-			if !item.Done {
-				fmt.Println(item.Task)
-			}
-		}
+		fmt.Println(l)
+
 	default:
 		flag.Usage()
 		os.Exit(0)
