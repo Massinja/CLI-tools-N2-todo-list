@@ -16,6 +16,8 @@ var (
 )
 
 func TestMain(m *testing.T) {
+	// Remove todo list to start clean
+	os.Remove(fileName)
 	fmt.Println("Building tool...")
 
 	if runtime.GOOS == "windows" {
@@ -33,7 +35,6 @@ func TestMain(m *testing.T) {
 	result := m.Run(binName, func(m *testing.T) {})
 	fmt.Println("result:", result)
 	fmt.Println("Cleaning up...")
-	//os.Remove(binName)
 	os.Remove(fileName)
 
 }
@@ -53,7 +54,7 @@ func TestTodoCLI(t *testing.T) {
 	})
 	t.Run("ListTasks", func(t *testing.T) {
 		cmd := exec.Command(cmdPath, "-list")
-		out, err := cmd.CombinedOutput()
+		out, err := cmd.Output()
 		if err != nil {
 			t.Fatal(err)
 		}
