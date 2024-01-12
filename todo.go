@@ -89,3 +89,15 @@ func (l *List) Get(filename string) error {
 
 	return nil
 }
+
+func (l *List) String() string {
+	formatted := ""
+	for k, t := range *l {
+		prefix := " "
+		if t.Done {
+			prefix = "X "
+		}
+		formatted += fmt.Sprintf("%s%d: %s\n", prefix, k+1, t.Task)
+	}
+	return formatted
+}
