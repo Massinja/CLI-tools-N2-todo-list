@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"todo"
 )
 
 var (
@@ -61,4 +62,22 @@ func TestTodoCLI(t *testing.T) {
 			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
 		}
 	})
+	t.Run("CompleteTask", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-complete", "1")
+		if err := cmd.Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+	t.Run("CheckCompleteTask", func(t *testing.T) {
+		l := todo.List{}
+		err := l.Get(fileName)
+		todo.CheckErr(err)
+		if !l[0].Done {
+			t.Errorf("task was not marked as complete")
+		}
+	})
+	t.Run("RemoveTodoList", func(t *testing.T) {
+		os.Remove(fileName)
+	})
+
 }
