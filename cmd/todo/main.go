@@ -10,10 +10,19 @@ import (
 const todoFileName = "todo.json"
 
 func main() {
+
 	// Parsing command line flags
 	task := flag.String("task", "", "Task to be included in the todo list")
 	list := flag.Bool("list", false, "List all tasks")
 	complete := flag.Int("complete", 0, "Item to be completed")
+
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"%s tool. Developed by Massinja\n", os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage information:\n")
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 
 	//Define an Items List
@@ -50,8 +59,8 @@ func main() {
 			}
 		}
 	default:
-		fmt.Fprintln(os.Stderr, "Invalid option")
-		os.Exit(1)
+		flag.Usage()
+		os.Exit(0)
 
 	}
 
