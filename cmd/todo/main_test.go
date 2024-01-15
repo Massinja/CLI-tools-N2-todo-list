@@ -79,6 +79,7 @@ func TestTodoCLI(t *testing.T) {
 	})
 	t.Run("RemoveTodoList", func(t *testing.T) {
 		os.Remove(fileName)
+		os.Remove(binName)
 	})
 
 }
