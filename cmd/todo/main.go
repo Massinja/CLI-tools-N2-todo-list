@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Parsing command line flags
-	task := flag.String("task", "", "Task to be included in the todo list")
+	add := flag.Bool("add", false, "Add task to the ToDo list")
 	list := flag.Bool("list", false, "List all tasks")
 	complete := flag.Int("complete", 0, "Item to be completed")
 
@@ -59,14 +59,14 @@ func main() {
 	}
 
 	switch {
-	case *task != "":
-		firstString := *task
+	case *add:
+		t, err := getTask(os.Stdin, flag.Args()...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		l.Add(t)
 
-		// temporarily solution.
-		// In case user doesn't use "" to join multiple words to describe a task
-		allStrings := flag.Args()
-		allStrings = append([]string{firstString}, allStrings...)
-		l.Add(strings.Join(allStrings, " "))
 		if err := l.Save(todoFileName); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
