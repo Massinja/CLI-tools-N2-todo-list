@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +17,9 @@ var (
 )
 
 func TestMain(m *testing.T) {
+	if os.Getenv("TODO_FILENAME") != "" {
+		fileName = os.Getenv("TODO_FILENAME")
+	}
 	// Remove todo list to start clean
 	os.Remove(fileName)
 	fmt.Println("Building tool...")
@@ -46,8 +50,21 @@ func TestTodoCLI(t *testing.T) {
 		t.Fatal(err)
 	}
 	cmdPath := filepath.Join(dir, binName)
-	t.Run("AddNewTask", func(t *testing.T) {
-		cmd := exec.Command(cmdPath, "-task", task)
+	t.Run("AddNewTaskFromArguments", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add", task)
+		if err := cmd.Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+	task2 := "task number 2"
+	t.Run("AddNewTaskFromSTDIN", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add")
+		cmdStdIn, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		io.WriteString(cmdStdIn, task2)
+		cmdStdIn.Close()
 		if err := cmd.Run(); err != nil {
 			t.Fatal(err)
 		}
@@ -58,7 +75,7 @@ func TestTodoCLI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := " 1: " + task + "\n"
+		expected := " 1: " + task + "\n" + " 2: " + task2 + "\n"
 		if expected != string(out) {
 			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
 		}
