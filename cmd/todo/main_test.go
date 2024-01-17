@@ -91,7 +91,28 @@ func TestTodoCLI(t *testing.T) {
 		err := l.Get(fileName)
 		todo.CheckErr(err)
 		if !l[0].Done {
-			t.Errorf("task was not marked as complete")
+			t.Errorf("Task was not marked as complete")
+		}
+	})
+
+	t.Run("DeleteTask", func(t *testing.T) {
+		l := todo.List{}
+		if err := l.Get(fileName); err != nil {
+			t.Fatal(err)
+		}
+		length := len(l)
+		cmd := exec.Command(cmdPath, "-del", "1")
+		if err := cmd.Run(); err != nil {
+			t.Fatal(err)
+		}
+		if err := l.Get(fileName); err != nil {
+			t.Fatal(err)
+		}
+		if len(l) == length {
+			t.Errorf("Item was not deleted")
+		}
+		if len(l) < length && l[0].Task != task2 {
+			t.Errorf("Wrong item was deleted")
 		}
 	})
 	t.Run("RemoveTodoList", func(t *testing.T) {
