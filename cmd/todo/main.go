@@ -37,7 +37,7 @@ func main() {
 
 	// Parsing command line flags
 	add := flag.Bool("add", false, "Add task to the ToDo list")
-	list := flag.Bool("list", false, "List all tasks")
+	list := flag.String("list", "a", "List tasks. Options:\na - all, u - uncompleted, c - completed")
 	complete := flag.Int("complete", 0, "Item to be completed")
 	del := flag.Int("del", 0, "Item to be deleted")
 
@@ -83,9 +83,26 @@ func main() {
 			os.Exit(1)
 		}
 
-	case *list:
+	case *list == "a":
 		fmt.Print(l)
 
+	case *list == "u":
+		i := 0
+		for _, task := range *l {
+			if task.Done == false {
+				i = i + 1
+				fmt.Printf(" %v: %v\n", i, task.Task)
+			}
+		}
+
+	case *list == "c":
+		i := 0
+		for _, task := range *l {
+			if task.Done == true {
+				i = i + 1
+				fmt.Printf(" %v: %v\n", i, task.Task)
+			}
+		}
 	case *del > 0:
 		if err := l.Delete(*del); err != nil {
 			fmt.Fprintln(os.Stderr, err)
