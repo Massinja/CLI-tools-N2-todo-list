@@ -38,9 +38,6 @@ func TestMain(m *testing.T) {
 	fmt.Println("Running tests...")
 	result := m.Run(binName, func(m *testing.T) {})
 	fmt.Println("result:", result)
-	fmt.Println("Cleaning up...")
-	os.Remove(fileName)
-
 }
 
 func TestTodoCLI(t *testing.T) {
@@ -69,13 +66,13 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	t.Run("ListTasks", func(t *testing.T) {
-		cmd := exec.Command(cmdPath, "-list")
+	t.Run("ListAllTasks", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list", "a")
 		out, err := cmd.Output()
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := " 1: " + task + "\n" + " 2: " + task2 + "\n"
+		expected := " O: " + task + "\n" + " O: " + task2 + "\n"
 		if expected != string(out) {
 			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
 		}
@@ -95,12 +92,36 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
+	t.Run("ListCompleteTasks", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list", "c")
+		out, err := cmd.Output()
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := " 1: " + task + "\n"
+		if expected != string(out) {
+			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
+		}
+	})
+	t.Run("ListUncompletedTasks", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list", "u")
+		out, err := cmd.Output()
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := " 1: " + task2 + "\n"
+		if expected != string(out) {
+			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
+		}
+	})
+
 	t.Run("DeleteTask", func(t *testing.T) {
-		l := todo.List{}
+		l := &todo.List{}
 		if err := l.Get(fileName); err != nil {
 			t.Fatal(err)
 		}
-		length := len(l)
+		length := len(*l)
+
 		cmd := exec.Command(cmdPath, "-del", "1")
 		if err := cmd.Run(); err != nil {
 			t.Fatal(err)
@@ -108,13 +129,49 @@ func TestTodoCLI(t *testing.T) {
 		if err := l.Get(fileName); err != nil {
 			t.Fatal(err)
 		}
-		if len(l) == length {
+
+		if len(*l) == length {
 			t.Errorf("Item was not deleted")
 		}
-		if len(l) < length && l[0].Task != task2 {
+		tasks := *l
+
+		if len(*l) < length && tasks[0].Task != task2 {
 			t.Errorf("Wrong item was deleted")
 		}
 	})
+
+	t.Run("AddMultipleTasksFromSTDIN", func(t *testing.T) {
+		l := &todo.List{}
+		if err := l.Get(fileName); err != nil {
+			t.Fatal(err)
+		}
+		length := len(*l)
+
+		cmd := exec.Command(cmdPath, "-add")
+		cmdStdIn, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		task3 := "task 3\n"
+		task4 := "task 4\n"
+		io.WriteString(cmdStdIn, task3)
+		io.WriteString(cmdStdIn, task4)
+		cmdStdIn.Close()
+		if err := cmd.Run(); err != nil {
+			t.Fatal(err)
+		}
+		if err := l.Get(fileName); err != nil {
+			t.Fatal(err)
+		}
+		if len(*l) == length {
+			t.Errorf("Items were not added")
+		}
+		if len(*l) == length+1 {
+			t.Errorf("Only one item was added instead of two")
+		}
+
+	})
+
 	t.Run("RemoveTodoList", func(t *testing.T) {
 		os.Remove(fileName)
 		os.Remove(binName)
