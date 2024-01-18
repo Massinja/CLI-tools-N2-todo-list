@@ -37,7 +37,7 @@ func main() {
 
 	// Parsing command line flags
 	add := flag.Bool("add", false, "Add task to the ToDo list")
-	list := flag.String("list", "a", "List tasks. Options:\na - all, u - uncompleted, c - completed")
+	list := flag.String("list", "", "List tasks. Options:\na - all, u - uncompleted, c - completed")
 	complete := flag.Int("complete", 0, "Item to be completed")
 	del := flag.Int("del", 0, "Item to be deleted")
 
