@@ -92,12 +92,12 @@ func (l *List) Get(filename string) error {
 
 func (l *List) String() string {
 	formatted := ""
-	for k, t := range *l {
-		prefix := " "
+	for _, t := range *l {
 		if t.Done {
-			prefix = "X "
+			formatted += fmt.Sprintf(" X: %s\n", t.Task)
+		} else {
+			formatted += fmt.Sprintf(" O: %s\n", t.Task)
 		}
-		formatted += fmt.Sprintf("%s%d: %s\n", prefix, k+1, t.Task)
 	}
 	return formatted
 }
