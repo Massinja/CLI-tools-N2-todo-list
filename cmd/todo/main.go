@@ -13,20 +13,26 @@ import (
 var todoFileName = "todo.json"
 
 // getTask decides where to get the description for a new task from: arguments o STDIN
-func getTask(r io.Reader, args ...string) (string, error) {
+func getTask(r io.Reader, args ...string) ([]string, error) {
+	tasks := []string{}
 	if len(args) > 0 {
-		return strings.Join(args, ""), nil
+		tasks := append(tasks, strings.Join(args, ""))
+		return tasks, nil
 	}
 
 	s := bufio.NewScanner(r)
-	s.Scan()
-	if err := s.Err(); err != nil {
-		return "", err
+	s.Split(bufio.ScanLines)
+	for s.Scan() {
+		if err := s.Err(); err != nil {
+			return tasks, err
+		}
+		if s.Text() == "" {
+			return tasks, nil
+		}
+		tasks = append(tasks, s.Text())
 	}
-	if len(s.Text()) == 0 {
-		return "", fmt.Errorf("Task cannot be blank")
-	}
-	return s.Text(), nil
+
+	return tasks, nil
 }
 
 func main() {
@@ -66,7 +72,9 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		l.Add(t)
+		for _, v := range t {
+			l.Add(v)
+		}
 
 		if err := l.Save(todoFileName); err != nil {
 			fmt.Fprintln(os.Stderr, err)
