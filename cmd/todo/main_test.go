@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 	"todo"
 )
 
@@ -76,7 +77,7 @@ func TestTodoCLI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := " O: " + task + "\n" + " O: " + task2 + "\n"
+		expected := fmt.Sprintf(" O: %s\n O: %s\n", task, task2)
 		if expected != string(out) {
 			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
 		}
@@ -96,15 +97,14 @@ func TestTodoCLI(t *testing.T) {
 		if !l[0].Done {
 			t.Errorf("Task was not marked as complete")
 		}
-	})
-
-	t.Run("ListCompleteTasks", func(t *testing.T) {
+		timecomp := l[0].CompletedAt.Format(time.DateTime)
 		cmd := exec.Command(cmdPath, "-list", "c")
 		out, err := cmd.Output()
 		if err != nil {
 			t.Fatal(err)
 		}
-		expected := " 1: " + task + "\n"
+
+		expected := fmt.Sprintf(" 1) %v: %v\n", timecomp, task)
 		if expected != string(out) {
 			t.Errorf("Expected %q, got %q instead\n", expected, string(out))
 		}
