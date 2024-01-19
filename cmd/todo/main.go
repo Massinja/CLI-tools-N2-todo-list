@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 	"todo"
 )
 
@@ -108,7 +109,7 @@ func main() {
 		for _, task := range *l {
 			if task.Done == true {
 				i = i + 1
-				fmt.Printf(" %v: %v\n", i, task.Task)
+				fmt.Printf(" %v) %v: %v\n", i, task.CompletedAt.Format(time.DateTime), task.Task)
 			}
 		}
 
