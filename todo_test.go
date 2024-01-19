@@ -1,7 +1,6 @@
 package todo_test
 
 import (
-	"errors"
 	"os"
 	"testing"
 	"todo"
@@ -21,16 +20,18 @@ func TestAdd(t *testing.T) {
 // TestComplete
 func TestComplete(t *testing.T) {
 	l := todo.List{}
-	taskName := "Buy Coffee"
-	item1 := todo.Item{Task: taskName}
+	task1 := "Buy Coffee"
+	item1 := todo.Item{Task: task1}
+	task2 := "Read the Book"
+	item2 := todo.Item{Task: task2}
 	l = append(l, item1)
-	l = append(l, todo.Item{Task: "Read the Book"})
+	l = append(l, item2)
 	l.Complete(1)
 	if !l[0].Done {
-		t.Errorf("new task should be completed")
+		t.Errorf("task %s was not marked complete", task1)
 	}
 	if l[1].Done {
-		t.Errorf("this task should not be complete yet")
+		t.Errorf("task %s task should not be complete yet", task2)
 	}
 }
 
@@ -56,23 +57,30 @@ func TestDelete(t *testing.T) {
 
 }
 
-// TestSave
-func TestSave(t *testing.T) {
-	l := todo.List{}
-	l = append(l, todo.Item{Task: "Task1"})
-	l = append(l, todo.Item{Task: "Task2"})
-	l = append(l, todo.Item{Task: "Task3"})
+// TestSaveGet
+func TestSaveGet(t *testing.T) {
+	listSave := todo.List{}
+	listSave = append(listSave, todo.Item{Task: "Task1"})
+	listSave = append(listSave, todo.Item{Task: "Task2"})
+	listSave = append(listSave, todo.Item{Task: "Task3"})
 
 	testFile := "testingTodo"
-	l.Save(testFile)
+	if err := listSave.Save(testFile); err != nil {
+		t.Errorf("Could not save Items in the list: %v", err)
+	}
 	defer os.Remove(testFile)
-	if _, err := os.Stat(testFile); err == nil {
 
-	} else if errors.Is(err, os.ErrNotExist) {
-		t.Errorf("List was not saved in a file")
+	listGet := todo.List{}
+	if err := listGet.Get(testFile); err != nil {
+		t.Errorf("Could not get list Items: %v", err)
+	}
+	if length := len(listGet); length < 3 {
+		t.Errorf("List was truncated")
+	} else if length > 3 {
+		t.Errorf("List is too long")
+	}
+	if listGet[0].Task != "Task1" {
+		t.Errorf("Tasks were not saved properly")
 	}
 
-	
 }
-
-// TestGet
