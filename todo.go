@@ -3,7 +3,6 @@ package todo
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"time"
 )
@@ -16,13 +15,6 @@ type Item struct {
 }
 
 type List []Item
-
-func CheckErr(e error) {
-	if e != nil {
-		fmt.Errorf("%v", e)
-		return
-	}
-}
 
 // Add creates a new todo item and appends it to the list
 func (l *List) Add(task string) {
@@ -66,10 +58,14 @@ func (l *List) Delete(i int) error {
 func (l *List) Save(filename string) error {
 
 	lj, err := json.Marshal(l)
-	CheckErr(err)
+	if err != nil {
+		return fmt.Errorf("couldn't convert to json: %v", err)
+	}
 
-	er := os.WriteFile(filename, lj, 0644)
-	CheckErr(er)
+	err = os.WriteFile(filename, lj, 0644)
+	if err != nil {
+		return fmt.Errorf("couldn't write to file %s: %v", filename, err)
+	}
 
 	return nil
 }
@@ -77,15 +73,20 @@ func (l *List) Save(filename string) error {
 // Get opens the file, decodes JSON and parses it into a List
 func (l *List) Get(filename string) error {
 
-	f, err := os.Open(filename)
-	CheckErr(err)
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+	if err != nil {
+		return fmt.Errorf("couldn't open file %s: %v", filename, err)
+	}
 
-	file, err := io.ReadAll(f)
-	CheckErr(err)
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("%v", err)
+	}
 	defer f.Close()
 
-	er := json.Unmarshal(file, l)
-	CheckErr(er)
+	if err := json.Unmarshal(file, l); err != nil {
+		return fmt.Errorf("couldn't convert from json file %s: %v", file, err)
+	}
 
 	return nil
 }
