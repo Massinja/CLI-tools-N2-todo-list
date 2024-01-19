@@ -16,7 +16,7 @@ var (
 	fileName = "todo.json"
 )
 
-func TestMain(m *testing.T) {
+func TestMain(m *testing.M) {
 	if os.Getenv("TODO_FILENAME") != "" {
 		fileName = os.Getenv("TODO_FILENAME")
 	}
@@ -31,13 +31,17 @@ func TestMain(m *testing.T) {
 	build := exec.Command("go", "build", "-o", binName)
 
 	if err := build.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot build tool %s: %s", binName, err)
-		os.Exit(1)
+		fmt.Errorf("Cannot build tool %s: %s", binName, err)
+		return
 	}
-
 	fmt.Println("Running tests...")
-	result := m.Run(binName, func(m *testing.T) {})
-	fmt.Println("result:", result)
+	result := m.Run()
+
+	fmt.Println("Cleaning up...")
+	os.Remove(fileName)
+	os.Remove(binName)
+
+	os.Exit(result)
 }
 
 func TestTodoCLI(t *testing.T) {
@@ -85,8 +89,10 @@ func TestTodoCLI(t *testing.T) {
 	})
 	t.Run("CheckCompleteTask", func(t *testing.T) {
 		l := todo.List{}
-		err := l.Get(fileName)
-		todo.CheckErr(err)
+		if err := l.Get(fileName); err != nil {
+			t.Errorf("Could not get the list: %v", err)
+			return
+		}
 		if !l[0].Done {
 			t.Errorf("Task was not marked as complete")
 		}
@@ -171,10 +177,4 @@ func TestTodoCLI(t *testing.T) {
 		}
 
 	})
-
-	t.Run("RemoveTodoList", func(t *testing.T) {
-		os.Remove(fileName)
-		os.Remove(binName)
-	})
-
 }
